@@ -1,0 +1,98 @@
+body {
+    font-family: helvetica;
+    font-size: 14px;
+}
+
+#cy {
+    width: 100%;
+    height: 70%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    border: 1px solid black;
+
+}
+
+#other {
+    width: 100%;
+    height: 30%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 999;
+    border: 1px solid black;
+
+}
+
+h1 {
+    opacity: 0.5;
+    font-size: 1em;
+}
+
+.column {
+    float: left;
+    padding: 20px;
+    width: 20%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.button-div {
+    padding: 10px;
+    width: 100%;
+    align-content: center;
+    margin: 20px;
+}
+
+.button {
+    background: #02C39A;
+    border-radius: 100px;
+    padding: 20px 60px;
+    color: #fff;
+    text-decoration: none;
+    align-content: center;
+    left: 15%;
+    font-size: 1.45em;
+    margin: 15px;
+}
+
+/* Hover state animation applied here */
+.button:hover {
+    background: #00A896;
+}
+
+/* Active state animation applied here */
+.button:active {
+
+    background: #028090;
+}
+
+
+
+h2 {
+    font-size: 1.7em;
+    color: black;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+h4 {
+    font-size: 1.2em;
+}
+
+.footer {
+    height: 50px;
+    bottom: 0;
+    color: black;
+    font-size: large;
+
+
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE>
+<html>
+
+
+<head>
+    <title>Interactions Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+    <link href="style.css" type="text/css" rel="stylesheet" />
+
+    <!-- For loading external data files -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise,fetch"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.2/cytoscape.min.js"></script>
+
+    <script src="http://materializecss.com/extras/noUiSlider/nouislider.js"></script>
+    <link href="http://materializecss.com/extras/noUiSlider/nouislider.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+
+
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+</head>
+
+<body>
+    <h3>Interactions Demo</h3>
+    <h2>
+        Please Note, the Lower Thresholds used will result in much slower loading time
+    </h2>
+
+    <div id="cy"></div>
+    <!-- Load application code at the end to ensure DOM is loaded -->
+    <!-- Compiled and minified CSS -->
+
+
+
+    <div id="other">
+        <div class="row">
+            <div class="column">
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+            </div>
+            <div class="column">
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+            </div>
+            <div class="column">
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+
+
+                <h4>Cytoscape Network Format</h4>
+                <form action="#">
+                    <p>
+                        <label>
+                            <input name="group1" id="net" type="radio" />
+                            <span>Network</span>
+                        </label>
+                    </p>
+                    <p>
+                        <label>
+                            <input name="group1" type="radio" checked />
+                            <span>Circle</span>
+                        </label>
+                    </p>
+                </form>
+            </div>
+            <div class="column">
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <h4 class="range-header"></h4>
+                <div class="range-slider"></div>
+                <div class="button-div">
+                    <a id="newFilts" class="button">Submit Changes</a>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <script src="code.js"></script>
+
+</body>
+
+
+</html>
