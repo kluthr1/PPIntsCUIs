@@ -6,10 +6,7 @@ var sliders = document.getElementsByClassName("range-slider");
 setSlidersAndHeaders(headers, sliders, score_index);
 var getNet = document.getElementById('net').checked
 
-function getRadio(getRadio) {
 
-
-}
 
 function setSlidersAndHeaders(headers, sliders, scoreIndexes) {
 
@@ -116,7 +113,7 @@ function parseStringCUIS(rawStr) {
 }
 
 function cleanCUIPairs(rawData, filtIndex, filtVals) {
-
+    alz = ['C1863052', 'C2931257', 'C0002395', 'C1843013', 'C0494463', 'C0750901', 'C1863051', 'C1867751', 'C1834153', 'C1856170', 'C4015786', 'C1847200', 'C3549448', 'C4015781', 'C4015780', 'C1843015']
     keys = Object.keys(rawData)
     allEdges = []
     for (var i = 0; i < keys.length; i++) {
@@ -131,8 +128,13 @@ function cleanCUIPairs(rawData, filtIndex, filtVals) {
                 works = false;
             }
 
+
         }
         if (works) {
+            if (alz.indexOf(cui1) != -1 && alz.indexOf(cui2) == -1) {
+                console.log(cui1)
+                console.log(cui2)
+            }
             allEdges.push({
 
                 data: {
