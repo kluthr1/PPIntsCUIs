@@ -21,7 +21,7 @@ function setSlidersAndHeaders(headers, sliders, scoreIndexes) {
                 connect: true,
                 step: 1,
                 range: {
-                    'min': 700,
+                    'min': 400,
                     'max': 1000
                 },
                 format: wNumb({
@@ -113,37 +113,55 @@ function parseStringCUIS(rawStr) {
 }
 
 function cleanCUIPairs(rawData, filtIndex, filtVals) {
-    alz = ['C1863052', 'C2931257', 'C0002395', 'C1843013', 'C0494463', 'C0750901', 'C1863051', 'C1867751', 'C1834153', 'C1856170', 'C4015786', 'C1847200', 'C3549448', 'C4015781', 'C4015780', 'C1843015']
+
     keys = Object.keys(rawData)
     allEdges = []
     for (var i = 0; i < keys.length; i++) {
+
         edge = rawData[keys[i]]
-        scores = edge["scores"]
+
+        rawscores = edge["scores"]
+        scores = rawscores.substring(1, rawscores.length - 1).split(", ");
+
         cui1 = edge["cui1"]
         cui2 = edge["cui2"]
+        name1 = edge["name1"]
+        name2 = edge["name2"]
+
         works = true;
         for (j = 0; j < filtIndex.length; j++) {
             index = filtIndex[j];
-            if (scores[index] < filtVals[j]) {
+            if (parseInt(scores[index]) < filtVals[j]) {
                 works = false;
+
             }
 
 
         }
+
         if (works) {
-            if (alz.indexOf(cui1) != -1 && alz.indexOf(cui2) == -1) {
-                console.log(cui1)
-                console.log(cui2)
-            }
+
             allEdges.push({
 
                 data: {
                     id: cui1 + "->" + cui2,
                     source: cui1,
                     target: cui2,
-                }
+                    options: {
+
+                        name1: name1,
+                        name2: name2,
+                        scores: scores,
+                        gene1: edge["gene1"],
+                        gene2: edge["gene2"]
+
+                    },
+
+                },
             })
+
         }
+
 
     }
     return allEdges;
@@ -159,8 +177,9 @@ function getNodesFromEdge(edges) {
             nodes.push(edges[i]["data"]["target"])
             cytoNodes.push({
                 data: {
-                    id: edges[i]["data"]["target"]
-                }
+                    id: edges[i]["data"]["target"],
+                    name: edges[i]["data"]["options"]["name2"]
+                },
             });
         }
         if (nodes.indexOf(edges[i]["data"]["source"]) == -1) {
@@ -168,8 +187,10 @@ function getNodesFromEdge(edges) {
             nodes.push(edges[i]["data"]["source"])
             cytoNodes.push({
                 data: {
-                    id: edges[i]["data"]["source"]
-                }
+                    id: edges[i]["data"]["source"],
+
+                    name: edges[i]["data"]["options"]["name1"]
+                },
             });
         }
     }
@@ -214,41 +235,48 @@ var cose = {
     fit: true,
     padding: 30,
     randomize: false,
-    componentSpacing: 100,
+    componentSpacing: 10,
     nodeRepulsion: 400000,
     edgeElasticity: 100,
     nestingFactor: 5,
-    gravity: 80,
+    gravity: 100,
     numIter: 1000,
     initialTemp: 200,
     coolingFactor: 0.95,
     minTemp: 1.0
 }
 var styles = [{
-    "selector": "core",
-    "style": {
-        "selection-box-color": "#AAD8FF",
-        "selection-box-border-color": "#8BB0D0",
-        "selection-box-opacity": "0.5"
-    }
+        "selector": "core",
+        "style": {
+            "selection-box-color": "#AAD8FF",
+            "selection-box-border-color": "#8BB0D0",
+            "selection-box-opacity": "0.5",
+        }
                     }, {
-    "selector": "node",
-    "style": {
-        "width": "mapData(score, 0, 0.006769776522008331, 20, 60)",
-        "height": "mapData(score, 0, 0.006769776522008331, 20, 60)",
-        "content": "data(name)",
-        "font-size": "12px",
-        "text-valign": "center",
-        "text-halign": "center",
-        "background-color": "#555",
-        "text-outline-color": "#555",
-        "text-outline-width": "2px",
-        "color": "#fff",
-        "label": "data(id)",
-        "overlay-padding": "6px",
-        "z-index": "10"
-    }
-                    }]
+        "selector": "node",
+        "style": {
+            "width": "mapData(score, 0, 0.006769776522008331, 20, 60)",
+            "height": "mapData(score, 0, 0.006769776522008331, 20, 60)",
+            "content": "data(name)",
+            "font-size": "12px",
+            "text-valign": "center",
+            "text-halign": "center",
+            "background-color": "#555",
+            "text-outline-color": "#555",
+            "text-outline-width": "2px",
+            "color": "#fff",
+            "label": "data(name)",
+            "overlay-padding": "6px",
+            "z-index": "10",
+        },
+                    },
+    {
+        "selector": ':selected',
+        "style": {
+            'background-color': 'blue',
+            "z-index": "100"
+        }
+      }]
 var data = []
 
 function makeGraph() {
@@ -263,6 +291,7 @@ function makeGraph() {
     if (getNet) {
         layout = cose
     }
+    console.log(getNet);
     styles = window.styles;
     var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
@@ -275,9 +304,53 @@ function makeGraph() {
 
 
     });
+    cy.on('select', 'node', function (event) {
+        clearTimeout(cy.nodesSelectionTimeout);
+        cy.nodesSelectionTimeout = setTimeout(function () {
+            node = cy.$('node:selected')
+            data = node[0]["_private"]["data"]
+            console.log(data);
+            redges = cy.$('node:selected')[0].connectedEdges()
+            edges = []
+            for (i = 0; i < redges.length; i++) {
+                edges.push(redges[i][0]["_private"]["data"])
+            }
+            console.log(edges)
+            innerText = "CUI: " + data["id"] + "<br>" + "Name: " + data["name"] + "<hr> Edges: <br>"
+            allStr = [innerText]
+            for (i = 0; i < edges.length; i++) {
+                newStr = "CUI1: " + edges[i]["source"] + " <br> CUI2: " + edges[i]["target"]
+                opt = edges[i]["options"]
+                moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
+                moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+                moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + "<hr>"
+                curr = [newStr, moreStr, moreStr2, moreStr3]
+
+                allStr.push(curr.join(" "))
+            }
+            document.getElementById("select").innerHTML = allStr.join(" ")
+        }, 300)
+    })
+    cy.on('select', 'edge', function (event) {
+        clearTimeout(cy.nodesSelectionTimeout);
+        cy.nodesSelectionTimeout = setTimeout(function () {
+            edge = cy.$('edge:selected')
+            data = edge[0]["_private"]["data"]
+            console.log(data)
+            newStr = "CUI1: " + data["source"] + " <br> CUI2: " + data["target"]
+            opt = data["options"]
+            moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
+            moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+            moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + ""
+            curr = [newStr, moreStr, moreStr2, moreStr3]
+            document.getElementById("select").innerHTML = curr.join(" ")
+
+        }, 300)
+    })
+    window.cy = cy;
 }
 Promise.all([
-  fetch('cleanCuiPair70.json', {
+  fetch('cleanCuiPair40det.json', {
             mode: 'no-cors'
         })
     .then(function (res) {

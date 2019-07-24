@@ -20,9 +20,16 @@ body {
     position: absolute;
     left: 0;
     bottom: 0;
+    overflow-y: hidden;
     z-index: 999;
     border: 1px solid black;
 
+}
+
+#select {
+    height: 100%;
+    width: 100%;
+    padding-bottom: 20px;
 }
 
 h1 {
@@ -34,6 +41,9 @@ h1 {
     float: left;
     padding: 20px;
     width: 20%;
+    height: 100%;
+    margin-bottom: 10px;
+    overflow-y: auto;
 }
 
 /* Clear floats after the columns */
