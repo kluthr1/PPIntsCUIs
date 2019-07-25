@@ -112,8 +112,9 @@ function parseStringCUIS(rawStr) {
     }
 }
 
-function cleanCUIPairs(rawData, filtIndex, filtVals) {
-
+function cleanCUIPairs(rawData, filtIndex, filtVals, sval) {
+    console.log(sval)
+    searchVal = sval.toLowerCase().trim()
     keys = Object.keys(rawData)
     allEdges = []
     for (var i = 0; i < keys.length; i++) {
@@ -127,16 +128,31 @@ function cleanCUIPairs(rawData, filtIndex, filtVals) {
         cui2 = edge["cui2"]
         name1 = edge["name1"]
         name2 = edge["name2"]
-
         works = true;
+
+        if (searchVal != "") {
+            if (!name1.toLowerCase().includes(searchVal) && !name2.toLowerCase().includes(searchVal)) {
+                if (searchVal.length == 8 && !isNaN(searchVal.substring(1, searchVal.length))) {
+                    if (!cui1.toLowerCase().includes(searchVal) && !cui2.toLowerCase().includes(searchVal)) {
+                        works = false;
+
+                    } else {
+                        works = true;
+                    }
+                } else {
+                    works = false;
+                }
+            }
+
+        }
         for (j = 0; j < filtIndex.length; j++) {
             index = filtIndex[j];
+
+
             if (parseInt(scores[index]) < filtVals[j]) {
                 works = false;
 
             }
-
-
         }
 
         if (works) {
@@ -197,9 +213,8 @@ function getNodesFromEdge(edges) {
     return cytoNodes;
 }
 
-function getedges(rawData, filtIndex, filtVals) {
-    console.log("runn")
-    return (cleanCUIPairs(rawData, filtIndex, filtVals))
+function getedges(rawData, filtIndex, filtVals, sval) {
+    return (cleanCUIPairs(rawData, filtIndex, filtVals, sval))
 }
 var cicle = {
     name: 'circle',
@@ -281,9 +296,10 @@ var data = []
 
 function makeGraph() {
     getNet = document.getElementById('net').checked
-
+    nameFilt = document.getElementById('icon_prefix').value;
     filts = getScores(window.sliders, window.score_index)
-    edges = getedges(window.data, filts["filtIndex"], filts["filtVals"]);
+    console.log(nameFilt);
+    edges = getedges(window.data, filts["filtIndex"], filts["filtVals"], nameFilt);
     nodes = getNodesFromEdge(edges)
     circle = window.cicle;
     cose = window.cose;
@@ -308,15 +324,15 @@ function makeGraph() {
         clearTimeout(cy.nodesSelectionTimeout);
         cy.nodesSelectionTimeout = setTimeout(function () {
             node = cy.$('node:selected')
-            data = node[0]["_private"]["data"]
-            console.log(data);
+            tdata = node[0]["_private"]["data"]
+            console.log(tdata);
             redges = cy.$('node:selected')[0].connectedEdges()
             edges = []
             for (i = 0; i < redges.length; i++) {
                 edges.push(redges[i][0]["_private"]["data"])
             }
             console.log(edges)
-            innerText = "CUI: " + data["id"] + "<br>" + "Name: " + data["name"] + "<hr> Edges: <br>"
+            innerText = "CUI: " + tdata["id"] + "<br>" + "Name: " + tdata["name"] + "<hr> Edges: <br>"
             allStr = [innerText]
             for (i = 0; i < edges.length; i++) {
                 newStr = "CUI1: " + edges[i]["source"] + " <br> CUI2: " + edges[i]["target"]
@@ -335,10 +351,10 @@ function makeGraph() {
         clearTimeout(cy.nodesSelectionTimeout);
         cy.nodesSelectionTimeout = setTimeout(function () {
             edge = cy.$('edge:selected')
-            data = edge[0]["_private"]["data"]
-            console.log(data)
-            newStr = "CUI1: " + data["source"] + " <br> CUI2: " + data["target"]
-            opt = data["options"]
+            tdata = edge[0]["_private"]["data"]
+            console.log(tdata)
+            newStr = "CUI1: " + tdata["source"] + " <br> CUI2: " + tdata["target"]
+            opt = tdata["options"]
             moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
             moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
             moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + ""
