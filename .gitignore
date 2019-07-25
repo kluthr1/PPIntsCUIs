@@ -6,3 +6,6 @@
 
 *.ipynb
 !spec/*.ipynb
+
+*.py
+!spec/*.py
