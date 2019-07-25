@@ -422,13 +422,13 @@ function makeGraph() {
     window.cy = cy;
 }
 Promise.all([
-  fetch('cleanCuiPair40det.json', {
+  fetch('libraries/cleanCuiPair40det.json', {
             mode: 'no-cors'
         })
     .then(function (res) {
             return res.json()
         }),
-      fetch('geneInteraction.json', {
+      fetch('libraries/geneInteraction.json', {
             mode: 'no-cors'
         })
     .then(function (res) {
