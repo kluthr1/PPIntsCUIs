@@ -30,14 +30,13 @@
 </head>
 
 <body>
-    <h3>&nbsp;
-        &nbsp;
-        Interactions Demo</h3>
-    <h2>
+    <h2>&nbsp;
+        Protein and Gene Interactions Demo</h2>
+    <h3>
         &nbsp;
         &nbsp;
         Please Note, the Lower Thresholds used will result in much slower loading time
-    </h2>
+    </h3>
 
     <div id="cy"></div>
     <!-- Load application code at the end to ensure DOM is loaded -->
@@ -105,6 +104,16 @@
                         </label>
                     </p>
                 </form>
+                <h4> Display Gene Interactions</h4>
+                <div class="switch">
+                    <label>
+                        Off
+                        <input id="genes" type="checkbox">
+                        <span class="lever"></span>
+                        On
+                    </label>
+                </div>
+
                 <div class="button-div">
                     <button id="newFilts" class="btn waves-effect waves-light btn-large" type="submit" name="action">Submit Changes
                         <i class="material-icons right">send</i>

@@ -6,8 +6,6 @@ var sliders = document.getElementsByClassName("range-slider");
 setSlidersAndHeaders(headers, sliders, score_index);
 var getNet = document.getElementById('net').checked
 
-
-
 function setSlidersAndHeaders(headers, sliders, scoreIndexes) {
 
     for (i = 0; i < headers.length; i++) {
@@ -78,39 +76,7 @@ function getScores(sliders, score_index) {
     }
 }
 
-function parseStringCUIS(rawStr) {
-    string = rawStr;
-    string = string.substring(1, string.length - 1);
-    newStr = string.split("]");
-    allEdges = []
-    cuis = []
-    scores = []
-    for (i = 0; i < newStr.length; i++) {
-        spot = i % 3
-        if (spot == 0) {
-            news = newStr[i].split("[")
-            cuiStr = news[news.length - 1]
-            cuis = cuiStr.split(",")
-        }
-        if (spot == 0) {
-            news = newStr[i].split("[")
-            cuiStr = news[news.length - 1]
-            oldscores = cuiStr.split(",")
-            for (j = 0; j < oldscores.length; j++) {
-                scores.push(parseInt(oldscores[j]))
-            }
-        }
-        if (spot == 0) {
 
-            allEdges.push({
-                cuis: cuis,
-                scores: scores
-            })
-            cuis = []
-            scores = []
-        }
-    }
-}
 
 function cleanCUIPairs(rawData, filtIndex, filtVals, sval) {
     console.log(sval)
@@ -164,13 +130,67 @@ function cleanCUIPairs(rawData, filtIndex, filtVals, sval) {
                     source: cui1,
                     target: cui2,
                     options: {
-
+                        type: "ppInt",
                         name1: name1,
                         name2: name2,
                         scores: scores,
                         gene1: edge["gene1"],
                         gene2: edge["gene2"]
 
+                    },
+
+                },
+            })
+
+        }
+
+
+    }
+    return allEdges;
+
+}
+
+function geneCUIs(rawData, sval) {
+    console.log(sval)
+    searchVal = sval.toLowerCase().trim()
+    keys = Object.keys(rawData)
+    allEdges = []
+    for (var i = 0; i < keys.length; i++) {
+        edge = rawData[keys[i]]
+        cui1 = edge["cui1"]
+        cui2 = edge["cui2"]
+        name1 = edge["name1"]
+        name2 = edge["name2"]
+        works = true;
+
+        if (searchVal != "") {
+            if (!name1.toLowerCase().includes(searchVal) && !name2.toLowerCase().includes(searchVal)) {
+                if (searchVal.length == 8 && !isNaN(searchVal.substring(1, searchVal.length))) {
+                    if (!cui1.toLowerCase().includes(searchVal) && !cui2.toLowerCase().includes(searchVal)) {
+                        works = false;
+
+                    } else {
+                        works = true;
+                    }
+                } else {
+                    works = false;
+                }
+            }
+
+        }
+        if (works) {
+
+            allEdges.push({
+
+                data: {
+                    id: cui1 + "->" + cui2,
+                    source: cui1,
+                    target: cui2,
+                    options: {
+                        type: "geneInt",
+                        name1: name1,
+                        name2: name2,
+                        gene: edge["gene"],
                     },
 
                 },
@@ -213,8 +233,12 @@ function getNodesFromEdge(edges) {
     return cytoNodes;
 }
 
-function getedges(rawData, filtIndex, filtVals, sval) {
-    return (cleanCUIPairs(rawData, filtIndex, filtVals, sval))
+function getedges(rawData, filtIndex, filtVals, sval, geneInts, geneData) {
+    edges = (cleanCUIPairs(rawData, filtIndex, filtVals, sval))
+    if (geneInts) {
+        edges = edges.concat(geneCUIs(geneData, sval))
+    }
+    return edges
 }
 var cicle = {
     name: 'circle',
@@ -293,13 +317,16 @@ var styles = [{
         }
       }]
 var data = []
+var gene_data = []
 
 function makeGraph() {
+
     getNet = document.getElementById('net').checked
     nameFilt = document.getElementById('icon_prefix').value;
     filts = getScores(window.sliders, window.score_index)
-    console.log(nameFilt);
-    edges = getedges(window.data, filts["filtIndex"], filts["filtVals"], nameFilt);
+    genes = document.getElementById('genes').checked;
+    console.log(genes);
+    edges = getedges(window.data, filts["filtIndex"], filts["filtVals"], nameFilt, genes, window.gene_data);
     nodes = getNodesFromEdge(edges)
     circle = window.cicle;
     cose = window.cose;
@@ -325,24 +352,36 @@ function makeGraph() {
         cy.nodesSelectionTimeout = setTimeout(function () {
             node = cy.$('node:selected')
             tdata = node[0]["_private"]["data"]
-            console.log(tdata);
             redges = cy.$('node:selected')[0].connectedEdges()
             edges = []
             for (i = 0; i < redges.length; i++) {
                 edges.push(redges[i][0]["_private"]["data"])
             }
-            console.log(edges)
             innerText = "CUI: " + tdata["id"] + "<br>" + "Name: " + tdata["name"] + "<hr> Edges: <br>"
             allStr = [innerText]
             for (i = 0; i < edges.length; i++) {
-                newStr = "CUI1: " + edges[i]["source"] + " <br> CUI2: " + edges[i]["target"]
                 opt = edges[i]["options"]
-                moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
-                moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
-                moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + "<hr>"
-                curr = [newStr, moreStr, moreStr2, moreStr3]
+                if (opt["type"] == "ppInt") {
+                    start = "Type: Protein Interaction <br> "
+                    newStr = "CUI1: " + edges[i]["source"] + " <br> CUI2: " + edges[i]["target"]
+                    moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
+                    moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+                    moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + "<hr>"
+                    curr = [start, newStr, moreStr, moreStr2, moreStr3]
 
-                allStr.push(curr.join(" "))
+                    allStr.push(curr.join(" "))
+                } else {
+                    start = "Type: Common Gene Interaction <br> "
+                    newStr = "CUI1: " + edges[i]["source"] + " <br> CUI2: " + edges[i]["target"]
+                    moreStr = "<br> Gene: " + opt["gene"]
+                    moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+                    moreStr3 = "<hr>"
+
+                    curr = [start, newStr, moreStr, moreStr2, moreStr3]
+
+                    allStr.push(curr.join(" "))
+
+                }
             }
             document.getElementById("select").innerHTML = allStr.join(" ")
         }, 300)
@@ -352,13 +391,30 @@ function makeGraph() {
         cy.nodesSelectionTimeout = setTimeout(function () {
             edge = cy.$('edge:selected')
             tdata = edge[0]["_private"]["data"]
-            console.log(tdata)
-            newStr = "CUI1: " + tdata["source"] + " <br> CUI2: " + tdata["target"]
             opt = tdata["options"]
-            moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
-            moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
-            moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + ""
-            curr = [newStr, moreStr, moreStr2, moreStr3]
+
+            curr = []
+
+            if (opt["type"] == "ppInt") {
+                start = "Type: Protein Interaction <br> "
+
+                newStr = "CUI1: " + tdata["source"] + " <br> CUI2: " + tdata["target"]
+                moreStr = "<br> Gene1: " + opt["gene1"] + " <br> Gene2: " + opt["gene2"]
+                moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+                moreStr3 = " <br> Scores: " + opt["scores"].join(", ") + ""
+                curr = [start, newStr, moreStr, moreStr2, moreStr3]
+            } else {
+                start = "Type: Common Gene Interaction <br> "
+                newStr = "CUI1: " + tdata["source"] + " <br> CUI2: " + tdata["target"]
+                moreStr = "<br> Gene: " + opt["gene"]
+                moreStr2 = "<br> Name1: " + opt["name1"] + " <br> Name2: " + opt["name2"]
+                moreStr3 = "<hr>"
+
+                curr = [start, newStr, moreStr, moreStr2, moreStr3]
+
+
+            }
+
             document.getElementById("select").innerHTML = curr.join(" ")
 
         }, 300)
@@ -372,11 +428,19 @@ Promise.all([
     .then(function (res) {
             return res.json()
         }),
+      fetch('geneInteraction.json', {
+            mode: 'no-cors'
+        })
+    .then(function (res) {
+            return res.json()
+        }),
 
 ])
     .then(function (dataArray) {
 
         window.data = dataArray[0]
+        window.gene_data = dataArray[1]
+
         makeGraph();
 
     });
@@ -598,4 +662,37 @@ console.log(new Date().toLocaleTimeString());
     //console.log(edges);
 //console.log(newEdges)
 // return arr1d;
+function parseStringCUIS(rawStr) {
+    string = rawStr;
+    string = string.substring(1, string.length - 1);
+    newStr = string.split("]");
+    allEdges = []
+    cuis = []
+    scores = []
+    for (i = 0; i < newStr.length; i++) {
+        spot = i % 3
+        if (spot == 0) {
+            news = newStr[i].split("[")
+            cuiStr = news[news.length - 1]
+            cuis = cuiStr.split(",")
+        }
+        if (spot == 0) {
+            news = newStr[i].split("[")
+            cuiStr = news[news.length - 1]
+            oldscores = cuiStr.split(",")
+            for (j = 0; j < oldscores.length; j++) {
+                scores.push(parseInt(oldscores[j]))
+            }
+        }
+        if (spot == 0) {
+
+            allEdges.push({
+                cuis: cuis,
+                scores: scores
+            })
+            cuis = []
+            scores = []
+        }
+    }
+}
 } **/
